@@ -16,6 +16,7 @@ import android.view.View;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodReplacement;
+import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.XposedHelpers.ClassNotFoundError;
@@ -33,8 +34,6 @@ public class EnableMultipleWidgets implements IXposedHookLoadPackage {
 	};
 
 	public boolean mMultipleLockBooleanExists = true;
-
-	protected boolean mShouldForceCameraOn = true;
 
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
 		// Allow the user to switch between secure camera or Samsung's shortcuts.
@@ -59,6 +58,9 @@ public class EnableMultipleWidgets implements IXposedHookLoadPackage {
 		if (!lpparam.packageName.equals("android"))
 			return;
 		
+		final XSharedPreferences preferences =
+				new XSharedPreferences(getClass().getPackage().getName());
+		
 		final EasyUxHook hook = new EasyUxHook();
 
 		try {
@@ -66,10 +68,20 @@ public class EnableMultipleWidgets implements IXposedHookLoadPackage {
 			XposedBridge.hookAllConstructors(KeyguardHostView, new XC_MethodHook() {
 				@Override
 				protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-					if (mShouldForceCameraOn) {
-						Context context = (Context) param.args[0];
-						if (context != null)
-							Settings.System.putInt(context.getContentResolver(), "kg_enable_camera_widget", 1);
+					Context context = (Context) param.args[0];
+					preferences.reload();
+					if (preferences.getBoolean("force_widget_to_right", true)) {
+						if (context != null) {
+							Settings.System.putInt(context.getContentResolver(),
+									"kg_enable_camera_widget", 1);
+						}
+					}
+					
+					if (preferences.getBoolean("force_camera_instead_of_fav_apps", false)) {
+						if (context != null) {
+							Settings.System.putInt(context.getContentResolver(),
+									"kg_enable_camera_widget_type", 1);
+						}
 					}
 				}
 				@Override

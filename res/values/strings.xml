@@ -2,4 +2,12 @@
 
     <string name="app_name">Samsung Multiple Widgets</string>
 
+    <string name="force_widget_to_right">Force widget on the right</string>
+
+    <string name="force_widget_to_right_summary">Forces a widget to the right of your first widget, this can be the camera or favorite apps widget</string>
+
+    <string name="force_camera_title">Force camera widget</string>
+
+    <string name="force_camera_widget_summary">Forces camera widget instead of Favorite Apps widget</string>
+
 </resources>
